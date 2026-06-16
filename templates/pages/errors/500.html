@@ -1,0 +1,14 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Server Error — Shopverse{% endblock %}
+
+{% block content %}
+<div class="min-h-[60vh] flex flex-col items-center justify-center px-4 text-center py-24">
+  <p class="text-8xl font-black text-danger-100 mb-4">500</p>
+  <h1 class="text-2xl font-bold text-neutral-900 mb-2">Something went wrong</h1>
+  <p class="text-neutral-500 text-sm mb-8 max-w-sm">
+    We're having trouble on our end. Please try again in a few moments.
+  </p>
+  <a href="/" class="btn-primary">Return Home</a>
+</div>
+{% endblock %}

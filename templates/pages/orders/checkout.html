@@ -1,0 +1,274 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 py-10">
+
+<form method="post" action="{% url 'checkout_page' %}">
+{% csrf_token %}
+
+<div class="grid grid-cols-1 lg:grid-cols-5 gap-10">
+
+<div class="lg:col-span-3 space-y-8">
+
+<section class="bg-white border border-neutral-200 rounded-2xl p-6">
+
+<div class="flex items-center justify-between mb-5">
+<h2 class="font-bold text-neutral-900">
+Delivery Address
+</h2>
+
+<a href="/accounts/addresses/add/?next=checkout"
+class="text-sm font-semibold text-brand-600 hover:text-brand-700">
++ Add new
+</a>
+</div>
+
+{% if addresses %}
+
+<div class="space-y-3">
+
+{% for address in addresses %}
+
+<label class="flex items-start gap-4 p-4 rounded-xl border border-neutral-200 cursor-pointer hover:border-brand-500">
+
+<input
+type="radio"
+name="address_id"
+value="{{ address.id }}"
+class="accent-brand-600 mt-1"
+{% if address.is_default or forloop.first %}checked{% endif %}
+>
+
+<div class="flex-1">
+
+<p class="font-semibold text-neutral-900">
+{{ address.full_name }}
+</p>
+
+<p class="text-sm text-neutral-500">
+{{ address.address_line_1 }}
+{% if address.address_line_2 %}
+, {{ address.address_line_2 }}
+{% endif %}
+<br>
+
+{{ address.city }}, {{ address.state }}
+<br>
+
+{{ address.country }} - {{ address.postal_code }}
+</p>
+
+<p class="text-xs text-neutral-500 mt-1">
+{{ address.phone }}
+</p>
+
+</div>
+
+{% if address.is_default %}
+<span class="text-xs font-semibold text-brand-600">
+Default
+</span>
+{% endif %}
+
+</label>
+
+{% endfor %}
+
+</div>
+
+{% else %}
+
+<div class="text-center py-8">
+
+<p class="text-sm text-neutral-500 mb-4">
+No saved addresses yet.
+</p>
+
+<a
+href="/accounts/addresses/add/?next=checkout"
+class="inline-flex items-center bg-brand-600 text-white px-5 py-2 rounded-xl"
+>
+Add Address
+</a>
+
+</div>
+
+{% endif %}
+
+</section>
+
+<section class="bg-white border border-neutral-200 rounded-2xl p-6">
+
+<h2 class="font-bold text-neutral-900 mb-5">
+Payment Method
+</h2>
+
+<div class="space-y-3">
+
+{% if cod_allowed %}
+<label class="flex items-center gap-3 border border-neutral-200 rounded-xl p-4 cursor-pointer hover:border-brand-400 transition-colors">
+<input
+type="radio"
+name="payment_method"
+value="cod"
+checked
+class="accent-brand-600"
+>
+<div>
+<p class="font-semibold text-neutral-900">
+Cash on Delivery
+</p>
+<p class="text-sm text-neutral-500">
+Pay when your order arrives
+</p>
+</div>
+</label>
+{% else %}
+<div class="flex items-start gap-3 border border-neutral-200 bg-neutral-50 rounded-xl p-4 opacity-60 cursor-not-allowed">
+<div class="mt-0.5 w-4 h-4 rounded-full border-2 border-neutral-300 shrink-0"></div>
+<div>
+<p class="font-semibold text-neutral-500">
+Cash on Delivery
+</p>
+<p class="text-sm text-neutral-400">
+Not available for orders above ₹5,000
+</p>
+</div>
+</div>
+{% endif %}
+
+<label class="flex items-center gap-3 border border-neutral-200 rounded-xl p-4 cursor-pointer hover:border-brand-400 transition-colors">
+<input
+type="radio"
+name="payment_method"
+value="stripe"
+{% if not cod_allowed %}checked{% endif %}
+class="accent-brand-600"
+>
+<div>
+<p class="font-semibold text-neutral-900">
+Pay Online (Stripe)
+</p>
+<p class="text-sm text-neutral-500">
+Credit / Debit Card — secure &amp; instant
+</p>
+</div>
+</label>
+
+</div>
+
+{% if not cod_allowed %}
+<p class="mt-4 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+  Cash on Delivery is available only for orders up to ₹5,000. Online payment is required for this order.
+</p>
+{% endif %}
+
+{% if messages %}
+<div class="mt-4 space-y-2">
+{% for message in messages %}
+<p class="text-sm">
+{{ message }}
+</p>
+{% endfor %}
+</div>
+{% endif %}
+
+{% if addresses %}
+<button
+type="submit"
+class="mt-6 w-full bg-brand-600 hover:bg-brand-700 text-white font-bold py-4 rounded-xl"
+>
+Place Order → ₹{{ total|floatformat:0 }}
+</button>
+{% endif %}
+
+</section>
+
+</div>
+
+<div class="lg:col-span-2">
+
+<div class="bg-white border border-neutral-200 rounded-2xl p-6">
+
+<h2 class="font-bold text-neutral-900 mb-5">
+Order Summary
+</h2>
+
+<div class="space-y-3">
+
+{% for item in cart_items %}
+
+<div class="flex justify-between">
+
+<div>
+<p class="text-sm font-medium">
+{{ item.variant.product.name }}
+</p>
+
+<p class="text-xs text-neutral-500">
+Qty: {{ item.quantity }}
+</p>
+</div>
+
+<span class="font-semibold">
+₹{{ item.total_price|floatformat:0 }}
+</span>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<hr class="my-4">
+
+<div class="space-y-2">
+
+<div class="flex justify-between">
+<span>Subtotal</span>
+<span>₹{{ subtotal|floatformat:0 }}</span>
+</div>
+
+{% if discount %}
+<div class="flex justify-between text-green-600">
+<span>Discount</span>
+<span>-₹{{ discount|floatformat:0 }}</span>
+</div>
+{% endif %}
+
+<div class="flex justify-between">
+<span>Delivery</span>
+<span>
+{% if delivery_fee %}
+₹{{ delivery_fee|floatformat:0 }}
+{% else %}
+Free
+{% endif %}
+</span>
+</div>
+
+</div>
+
+<hr class="my-4">
+
+<div class="flex justify-between font-bold">
+
+<span>Total</span>
+
+<span>
+₹{{ total|floatformat:0 }}
+</span>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</form>
+
+</div>
+{% endblock %}

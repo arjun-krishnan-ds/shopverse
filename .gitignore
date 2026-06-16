@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+
+# Django
+db.sqlite3
+media/
+variant_images
+staticfiles/
+node_modules/
+venv/
+# Environment variables
+.env
+
+# VSCode
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+#DB
+data_backup.json
+data_backup_utf8.json
+db.sqlite3.backup
+db.sqlite3.backup-*
+*.json.bak

@@ -1,0 +1,68 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}
+  {% if query %}Search: "{{ query }}"{% else %}Search Products{% endif %} — Shopverse
+{% endblock %}
+
+{% block content %}
+<div
+  x-data="searchPage('{{ query|escapejs }}')"
+  class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+>
+
+  <!-- Search bar -->
+  <div class="max-w-2xl mb-8">
+    <div class="flex gap-3">
+      <input
+        x-model="query"
+        @keydown.enter.prevent="submit()"
+        type="text"
+        placeholder="Search products, brands…"
+        class="input flex-1"
+      >
+      <button @click="submit()" class="btn-primary shrink-0">Search</button>
+    </div>
+  </div>
+
+  {% if query %}
+    <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+      <p class="text-sm text-neutral-600">
+        <span class="font-semibold text-neutral-900">{{ products|length }}</span>
+        result{{ products|length|pluralize }} for
+        <span class="font-semibold text-neutral-900">"{{ query }}"</span>
+      </p>
+
+      <!-- Sort -->
+      <div class="flex items-center gap-2">
+        <span class="text-sm text-neutral-500">Sort:</span>
+        <select @change="applySort($event.target.value)"
+                class="border border-neutral-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:border-brand-500">
+          <option value="" {% if sort == "" %}selected{% endif %}>Relevance</option>
+          <option value="newest"     {% if sort == "newest" %}selected{% endif %}>Newest</option>
+          <option value="price_low"  {% if sort == "price_low" %}selected{% endif %}>Price: Low to High</option>
+          <option value="price_high" {% if sort == "price_high" %}selected{% endif %}>Price: High to Low</option>
+        </select>
+      </div>
+    </div>
+  {% endif %}
+
+  {% if products %}
+    <div class="product-grid">
+      {% for product in products %}
+        {% include "partials/products/product_card.html" %}
+      {% endfor %}
+    </div>
+
+    {% include "partials/ui/pagination.html" with page_obj=products paginator=products.paginator query=query %}
+
+  {% elif query %}
+    {% include "partials/ui/empty_state.html" with icon="search" title="No results found" description="Try different keywords or browse our catalogue." action_url="/products/" action_text="Browse All Products" %}
+  {% else %}
+    <div class="text-center py-16 text-sm text-neutral-400">
+      Enter a search term above to find products.
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

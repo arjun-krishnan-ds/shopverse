@@ -1,0 +1,166 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}Create Account — Shopverse{% endblock %}
+
+{% block content %}
+{% include "partials/ui/toast_container.html" %}
+
+<section class="min-h-[calc(100vh-80px)] flex items-center justify-center px-4 py-16 bg-gradient-to-br from-neutral-50 via-white to-brand-50/30">
+  <div class="w-full max-w-6xl grid lg:grid-cols-2 bg-white rounded-3xl overflow-hidden border border-neutral-200 shadow-2xl">
+
+    <!-- Left Premium Brand Panel -->
+    <div class="hidden lg:flex relative bg-neutral-950 text-white p-14 flex-col justify-between overflow-hidden">
+
+      <div class="absolute inset-0 bg-gradient-to-br from-brand-700/20 via-transparent to-brand-900/30"></div>
+
+      <div class="relative z-10">
+        <a href="/" class="text-4xl font-black tracking-tight">
+          <span class="text-brand-500">Shop</span>verse
+        </a>
+
+        <p class="mt-6 text-neutral-300 text-lg leading-relaxed max-w-md">
+          Create your premium shopping account and unlock a faster, smarter, more personalized shopping experience.
+        </p>
+      </div>
+
+      <div class="relative z-10 space-y-5">
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 rounded-2xl bg-brand-600/20 flex items-center justify-center">
+            ✨
+          </div>
+          <div>
+            <p class="font-semibold">Exclusive launches</p>
+            <p class="text-sm text-neutral-400">Access limited product drops first</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 rounded-2xl bg-brand-600/20 flex items-center justify-center">
+            ⚡
+          </div>
+          <div>
+            <p class="font-semibold">Faster checkout</p>
+            <p class="text-sm text-neutral-400">Save addresses and payment preferences</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 rounded-2xl bg-brand-600/20 flex items-center justify-center">
+            🎯
+          </div>
+          <div>
+            <p class="font-semibold">Smart recommendations</p>
+            <p class="text-sm text-neutral-400">Products tailored to your interests</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="p-8 sm:p-12 lg:p-14">
+
+      <div class="lg:hidden text-center mb-8">
+        <a href="/" class="text-3xl font-black">
+          <span class="text-brand-600">Shop</span>verse
+        </a>
+      </div>
+
+      <div class="mb-8">
+        <h1 class="text-3xl font-black text-neutral-900">Create Account</h1>
+        <p class="text-neutral-500 mt-2">
+          Join Shopverse and start shopping smarter.
+        </p>
+      </div>
+
+      <!-- Messages -->
+      {% if messages %}
+        {% for message in messages %}
+          <div class="mb-4 px-4 py-3 rounded-2xl text-sm font-medium
+            {% if message.tags == 'error' %}
+              bg-danger-50 text-danger-700 border border-danger-200
+            {% else %}
+              bg-success-50 text-success-700 border border-success-200
+            {% endif %}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <!-- Form Errors -->
+      {% if form.errors %}
+      <div class="mb-5 px-4 py-3 rounded-2xl bg-danger-50 border border-danger-200 text-danger-700 text-sm">
+        {% for field in form %}
+          {% for error in field.errors %}
+            <p>{{ error }}</p>
+          {% endfor %}
+        {% endfor %}
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Form -->
+      <form method="post" class="space-y-5">
+        {% csrf_token %}
+
+        <div>
+          <label for="id_email" class="label">Email Address</label>
+          <input
+            id="id_email"
+            type="email"
+            name="email"
+            required
+            autocomplete="email"
+            placeholder="you@example.com"
+            value="{{ form.email.value|default:'' }}"
+            class="input {% if form.email.errors %}border-danger-500{% endif %}"
+          >
+        </div>
+
+        <div>
+          <label for="id_password1" class="label">Password</label>
+          <input
+            id="id_password1"
+            type="password"
+            name="password1"
+            required
+            autocomplete="new-password"
+            placeholder="Minimum 8 characters"
+            class="input"
+          >
+        </div>
+
+        <div>
+          <label for="id_password2" class="label">Confirm Password</label>
+          <input
+            id="id_password2"
+            type="password"
+            name="password2"
+            required
+            autocomplete="new-password"
+            placeholder="Repeat your password"
+            class="input"
+          >
+        </div>
+
+        <button
+          type="submit"
+          class="w-full h-14 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-base transition-all duration-200 shadow-lg hover:shadow-xl"
+        >
+          Create Account
+        </button>
+      </form>
+
+      <p class="text-center text-sm text-neutral-500 mt-8">
+        Already have an account?
+        <a href="/accounts/login/" class="font-semibold text-brand-600 hover:text-brand-700 transition-colors">
+          Sign in
+        </a>
+      </p>
+
+    </div>
+  </div>
+</section>
+{% endblock %}

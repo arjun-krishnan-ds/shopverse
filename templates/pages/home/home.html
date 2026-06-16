@@ -1,0 +1,193 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}Shopverse — Premium Products{% endblock %}
+
+{% block content %}
+
+{# ── Hero ─────────────────────────────────────────────────────── #}
+{% if hero_banners %}
+  <section
+    x-data="heroSlider({{ hero_banners|length }})"
+    class="relative bg-neutral-900 text-white overflow-hidden"
+  >
+    {# Slides #}
+    {% for banner in hero_banners %}
+      <div
+        x-show="isActive({{ forloop.counter0 }})"
+        x-transition:enter="transition ease-out duration-500"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        class="relative min-h-[520px] flex items-center"
+      >
+        <img
+          src="{{ banner.image.url }}"
+          alt="{{ banner.title }}"
+          class="absolute inset-0 w-full h-full object-cover opacity-40"
+          loading="{% if forloop.first %}eager{% else %}lazy{% endif %}"
+        >
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          {% if banner.subtitle %}
+            <p class="text-brand-400 text-sm font-semibold uppercase tracking-widest mb-3">{{ banner.subtitle }}</p>
+          {% endif %}
+          <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight max-w-2xl">{{ banner.title }}</h1>
+          {% if banner.link %}
+            <a href="{{ banner.link }}"
+               class="mt-8 inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-8 py-3.5 rounded-xl transition-colors">
+              {{ banner.button_text|default:"Shop Now" }}
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+
+    {# Arrows (only shown when more than one banner) #}
+    {% if hero_banners|length > 1 %}
+      <button
+        @click="prev()"
+        class="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
+        aria-label="Previous"
+      >
+        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+      </button>
+      <button
+        @click="next()"
+        class="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-10 h-10 bg-white/20 hover:bg-white/40 rounded-full flex items-center justify-center transition-colors backdrop-blur-sm"
+        aria-label="Next"
+      >
+        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </button>
+
+      {# Dots #}
+      <div class="absolute bottom-6 inset-x-0 flex justify-center gap-2 z-10">
+        {% for banner in hero_banners %}
+          <button
+            @click="goTo({{ forloop.counter0 }})"
+            :class="isActive({{ forloop.counter0 }}) ? 'bg-white w-6' : 'bg-white/40 w-2'"
+            class="h-2 rounded-full transition-all duration-300"
+            aria-label="Slide {{ forloop.counter }}"
+          ></button>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </section>
+
+{% else %}
+  {# Fallback static hero #}
+  <section class="relative bg-gradient-to-br from-neutral-900 via-brand-950 to-neutral-900 text-white overflow-hidden">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-28">
+      <p class="text-brand-400 text-sm font-semibold uppercase tracking-widest mb-3">New arrivals</p>
+      <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight max-w-2xl">
+        Premium products,<br>delivered with care.
+      </h1>
+      <a href="/products/"
+         class="mt-8 inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold px-8 py-3.5 rounded-xl transition-colors">
+        Shop Now
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+      </a>
+    </div>
+  </section>
+{% endif %}
+
+{# ── Categories ───────────────────────────────────────────────── #}
+{% if categories %}
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <h2 class="text-2xl font-bold text-neutral-900 mb-8">Shop by Category</h2>
+    <div class="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
+      {% for cat in categories %}
+        <a href="/products/category/{{ cat.slug }}/"
+           class="flex flex-col items-center gap-2 shrink-0 group">
+          <div class="w-20 h-20 rounded-2xl bg-neutral-100 group-hover:bg-brand-50 border border-neutral-200 group-hover:border-brand-200 transition-colors overflow-hidden flex items-center justify-center">
+            {% if cat.image %}
+              <img src="{{ cat.image.url }}" alt="{{ cat.name }}" class="w-full h-full object-cover">
+            {% else %}
+              <span class="text-2xl">🛍️</span>
+            {% endif %}
+          </div>
+          <span class="text-xs font-medium text-neutral-700 group-hover:text-brand-600 transition-colors text-center max-w-[5rem] leading-tight">{{ cat.name }}</span>
+        </a>
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{# ── Featured Products ────────────────────────────────────────── #}
+{% if featured_products %}
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-bold text-neutral-900">Featured Products</h2>
+      <a href="/products/" class="text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">View all →</a>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      {% for product in featured_products %}
+        {% include "partials/products/product_card.html" %}
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{# ── Trending ─────────────────────────────────────────────────── #}
+{% if trending_products %}
+  <section class="bg-neutral-50 py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-2xl font-bold text-neutral-900">Trending Now</h2>
+        <a href="/products/?sort=popular" class="text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">See more →</a>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {% for product in trending_products %}
+          {% include "partials/products/product_card.html" %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}
+
+{# ── Top Rated ────────────────────────────────────────────────── #}
+{% if top_rated_products %}
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
+    <div class="flex items-center justify-between mb-8">
+      <h2 class="text-2xl font-bold text-neutral-900">Top Rated</h2>
+      <a href="/products/?sort=rating" class="text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">View all →</a>
+    </div>
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      {% for product in top_rated_products %}
+        {% include "partials/products/product_card.html" %}
+      {% endfor %}
+    </div>
+  </section>
+{% endif %}
+
+{# ── Recommendations (authenticated users) ────────────────────── #}
+{% if recommendations %}
+  <section class="bg-neutral-50 py-14">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between mb-8">
+        <h2 class="text-2xl font-bold text-neutral-900">Recommended For You</h2>
+        <a href="/products/" class="text-sm font-semibold text-brand-600 hover:text-brand-700 transition-colors">View all →</a>
+      </div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+        {% for product in recommendations %}
+          {% include "partials/products/product_card.html" %}
+        {% endfor %}
+      </div>
+    </div>
+  </section>
+{% endif %}
+
+{# ── Promo banner ─────────────────────────────────────────────── #}
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+  <div class="rounded-3xl bg-gradient-to-r from-brand-600 to-brand-800 text-white px-8 py-12 flex flex-col sm:flex-row items-center justify-between gap-6">
+    <div>
+      <p class="text-brand-200 text-sm font-semibold uppercase tracking-wider mb-2">Limited time</p>
+      <h2 class="text-2xl sm:text-3xl font-black">Free shipping on orders over ₹999</h2>
+    </div>
+    <a href="/products/"
+       class="shrink-0 bg-white text-brand-700 font-bold px-8 py-3 rounded-xl hover:bg-brand-50 transition-colors">
+      Shop Now
+    </a>
+  </div>
+</section>
+
+{% endblock %}

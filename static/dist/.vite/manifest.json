@@ -1,0 +1,23 @@
+{
+  "_alpine-DdaDH_LP.js": {
+    "file": "js/chunks/alpine-DdaDH_LP.js",
+    "name": "alpine"
+  },
+  "_axios-DcNlVx-A.js": {
+    "file": "js/chunks/axios-DcNlVx-A.js",
+    "name": "axios"
+  },
+  "src/main.js": {
+    "file": "js/main-C0PnQkb4.js",
+    "name": "main",
+    "src": "src/main.js",
+    "isEntry": true,
+    "imports": [
+      "_alpine-DdaDH_LP.js",
+      "_axios-DcNlVx-A.js"
+    ],
+    "css": [
+      "css/main-BKXPfJuu.css"
+    ]
+  }
+}

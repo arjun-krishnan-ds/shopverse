@@ -1,0 +1,111 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}{% if editing %}Edit{% else %}Add{% endif %} Address — Shopverse{% endblock %}
+
+{% block content %}
+<div class="max-w-xl space-y-6">
+
+  <div>
+    <a href="/accounts/addresses/" class="text-sm text-neutral-500 hover:text-neutral-800 transition-colors">← My Addresses</a>
+    <h1 class="text-xl font-bold text-neutral-900 mt-1">
+      {% if editing %}Edit Address{% else %}New Address{% endif %}
+    </h1>
+  </div>
+
+  {% if messages %}
+    {% for message in messages %}
+      <p class="px-4 py-3 rounded-xl text-sm font-medium bg-danger-50 text-danger-700 border border-danger-200">{{ message }}</p>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" class="bg-white border border-neutral-200 rounded-2xl p-6 space-y-5">
+    {% csrf_token %}
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+
+      <div>
+        <label class="block text-sm font-medium text-neutral-700 mb-1.5">Full Name *</label>
+        <input type="text" name="full_name" required
+               value="{{ address.full_name|default:'' }}"
+               class="w-full border border-neutral-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-neutral-700 mb-1.5">Phone Number *</label>
+        <input type="text" name="phone" required
+               value="{{ address.phone|default:'' }}"
+               class="w-full border border-neutral-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+      </div>
+
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-neutral-700 mb-1.5">Address Line 1 *</label>
+      <input type="text" name="address_line_1" required
+             value="{{ address.address_line_1|default:'' }}"
+             placeholder="House no., Street, Area"
+             class="w-full border border-neutral-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-neutral-700 mb-1.5">Address Line 2 <span class="text-neutral-400">(optional)</span></label>
+      <input type="text" name="address_line_2"
+             value="{{ address.address_line_2|default:'' }}"
+             placeholder="Landmark, Apartment, Floor"
+             class="w-full border border-neutral-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+
+      <div>
+        <label class="block text-sm font-medium text-neutral-700 mb-1.5">City *</label>
+        <input type="text" name="city" required
+               value="{{ address.city|default:'' }}"
+               class="w-full border border-neutral-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-neutral-700 mb-1.5">State *</label>
+        <input type="text" name="state" required
+               value="{{ address.state|default:'' }}"
+               class="w-full border border-neutral-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+      </div>
+
+      <div>
+        <label class="block text-sm font-medium text-neutral-700 mb-1.5">Postal Code *</label>
+        <input type="text" name="postal_code" required
+               value="{{ address.postal_code|default:'' }}"
+               class="w-full border border-neutral-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+      </div>
+
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-neutral-700 mb-1.5">Country</label>
+      <input type="text" name="country"
+             value="{{ address.country|default:'India' }}"
+             class="w-full border border-neutral-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500">
+    </div>
+
+    <label class="flex items-center gap-3 cursor-pointer">
+      <input type="checkbox" name="is_default"
+             {% if address.is_default %}checked{% endif %}
+             class="accent-brand-600 w-4 h-4">
+      <span class="text-sm font-medium text-neutral-700">Set as default address</span>
+    </label>
+
+    <div class="flex gap-3 pt-2">
+      <button type="submit"
+              class="flex-1 bg-brand-600 hover:bg-brand-700 text-white font-bold py-3 rounded-xl text-sm transition-colors">
+        {% if editing %}Save Changes{% else %}Add Address{% endif %}
+      </button>
+      <a href="/accounts/addresses/"
+         class="px-6 py-3 border border-neutral-300 hover:border-neutral-500 text-neutral-700 font-semibold rounded-xl text-sm transition-colors">
+        Cancel
+      </a>
+    </div>
+
+  </form>
+
+</div>
+{% endblock %}

@@ -1,0 +1,97 @@
+{% load static %}
+
+<nav class="bg-white border border-neutral-200 rounded-3xl overflow-hidden shadow-sm">
+
+
+<!-- Profile -->
+<div class="p-6 border-b border-neutral-100">
+
+    <div class="w-14 h-14 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center text-lg font-black">
+        {{ user.email|first|upper }}
+    </div>
+
+    <h3 class="mt-4 font-bold text-neutral-900">
+        My Account
+    </h3>
+
+    <p class="text-xs text-neutral-500 truncate mt-1">
+        {{ user.email }}
+    </p>
+
+</div>
+
+{% url 'dashboard_home' as url_dashboard %}
+{% url 'user_orders' as url_orders %}
+{% url 'address_list' as url_addresses %}
+{% url 'wishlist_list' as url_wishlist %}
+
+<div class="p-3">
+
+    <a href="{{ url_dashboard }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all {% if request.path == url_dashboard %}bg-brand-50 text-brand-700{% else %}text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900{% endif %}">
+
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+
+        <span>Dashboard</span>
+
+    </a>
+
+    <a href="{{ url_orders }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all {% if url_orders in request.path %}bg-brand-50 text-brand-700{% else %}text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900{% endif %}">
+
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+            <rect x="9" y="3" width="6" height="4" rx="1"/>
+        </svg>
+
+        <span>My Orders</span>
+
+    </a>
+
+    <a href="{{ url_addresses }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all {% if url_addresses in request.path %}bg-brand-50 text-brand-700{% else %}text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900{% endif %}">
+
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+            <circle cx="12" cy="10" r="3"/>
+        </svg>
+
+        <span>Addresses</span>
+
+    </a>
+
+    <a href="{{ url_wishlist }}"
+       class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold transition-all {% if url_wishlist in request.path %}bg-brand-50 text-brand-700{% else %}text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900{% endif %}">
+
+        <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+        </svg>
+
+        <span>Wishlist</span>
+
+    </a>
+
+    <div class="border-t border-neutral-100 mt-3 pt-3">
+
+        <a href="/accounts/logout/"
+           class="flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-semibold text-neutral-600 hover:bg-danger-50 hover:text-danger-700 transition-all">
+
+            <svg class="w-5 h-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+
+            <span>Sign Out</span>
+
+        </a>
+
+    </div>
+
+</div>
+
+
+</nav>

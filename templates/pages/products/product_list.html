@@ -1,0 +1,129 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}
+{% if query %}
+Results for "{{ query }}"
+{% elif selected_category %}
+{{ selected_category|title }}
+{% else %}
+All Products
+{% endif %} — Shopverse
+{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-bold text-neutral-900">
+      {% if query %}
+      Results for "{{ query }}"
+      {% elif selected_category %}
+      {{ selected_category|title }}
+      {% else %}
+      All Products
+      {% endif %}
+    </h1>
+
+    <p class="text-sm text-neutral-500 mt-1">
+      {{ paginator.count }} product{{ paginator.count|pluralize }} found
+    </p>
+  </div>
+
+  <!-- Layout -->
+  <div x-data="filterSidebar({
+  category: '{{ selected_category|escapejs }}',
+  brand: '{{ selected_brand|escapejs }}',
+  min_price: '{{ min_price|escapejs }}',
+  max_price: '{{ max_price|escapejs }}',
+  sort: '{{ sort|escapejs }}',
+  rating: '{{ rating|escapejs }}',
+  in_stock: {% if in_stock %}true{% else %}false{% endif %}
+})" x-cloak class="flex flex-col lg:flex-row gap-8">
+
+
+
+    <!-- Sidebar -->
+    <aside class="w-full lg:w-80 shrink-0">
+
+      <button @click="toggleMobile()"
+        class="lg:hidden flex items-center justify-between w-full px-5 py-4 rounded-2xl bg-white border border-neutral-200 shadow-sm mb-5">
+
+        <span class="font-semibold text-neutral-900">Filters</span>
+
+        <span x-show="activeFilterCount > 0" x-text="activeFilterCount"
+          class="w-7 h-7 rounded-full bg-brand-600 text-white text-xs flex items-center justify-center">
+        </span>
+      </button>
+
+      {% include "partials/products/filter_sidebar.html" %}
+    </aside>
+
+    <!-- Product grid -->
+    <div x-data="productList()" class="flex-1 min-w-0">
+      <span id="js-has-next" data-value="{{ page_obj.has_next|lower }}" class="hidden"></span>
+
+      {% if page_obj.object_list %}
+
+      <div id="product-grid" class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+        {% for product in page_obj %}
+        {% include "partials/products/product_card.html" %}
+        {% endfor %}
+      </div>
+
+      <!-- Infinite scroll -->
+      <div id="load-more-sentinel" class="h-10 mt-8"></div>
+
+      <!-- Loading -->
+      <div x-show="loading" class="flex justify-center py-8">
+        <div class="w-8 h-8 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+
+      <!-- Error -->
+      <div x-show="error" class="text-center py-6">
+        <p class="text-sm text-red-600" x-text="error"></p>
+
+        <button @click="loadMore()" class="mt-2 text-sm font-medium text-brand-600 hover:text-brand-700">
+          Try again
+        </button>
+      </div>
+
+      <!-- Manual load -->
+      <div x-show="hasNext && !loading" class="flex justify-center mt-8">
+        <button @click="loadMore()"
+          class="px-8 py-2.5 border border-neutral-300 text-sm font-medium text-neutral-700 rounded-xl hover:bg-neutral-100 transition-colors">
+          Load more
+        </button>
+      </div>
+
+      {% else %}
+
+      <!-- Empty -->
+      <div class="flex flex-col items-center justify-center py-24 text-center">
+
+        <svg class="w-16 h-16 text-neutral-200 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+          stroke-width="1">
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+
+        <p class="text-neutral-500 font-medium">
+          No products found
+        </p>
+
+        <p class="text-neutral-400 text-sm mt-1">
+          Try adjusting your filters
+        </p>
+
+        <button @click="reset()" class="mt-4 text-sm font-semibold text-brand-600 hover:text-brand-700">
+          Clear filters
+        </button>
+
+      </div>
+
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

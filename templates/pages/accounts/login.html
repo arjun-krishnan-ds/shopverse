@@ -1,0 +1,152 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}Sign In — Shopverse{% endblock %}
+
+{% block content %}
+{% include "partials/ui/toast_container.html" %}
+
+<section class="min-h-[calc(100vh-5rem)] bg-gradient-to-br from-neutral-50 via-white to-brand-50/40">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+
+    <div class="grid lg:grid-cols-2 gap-14 items-center">
+
+      <!-- Left Premium Showcase -->
+      <div class="hidden lg:flex flex-col justify-center">
+
+        <div class="max-w-xl">
+          <span class="inline-flex items-center px-4 py-1.5 rounded-full bg-brand-100 text-brand-700 text-sm font-semibold mb-6">
+            Premium Shopping Experience
+          </span>
+
+          <h1 class="text-5xl font-black tracking-tight text-neutral-900 leading-tight">
+            Access your
+            <span class="text-brand-600">Shopverse</span>
+            account
+          </h1>
+
+          <p class="mt-6 text-lg text-neutral-600 leading-relaxed">
+            Continue your premium shopping journey with personalised recommendations,
+            wishlist sync, secure checkout and exclusive member-only access.
+          </p>
+
+          <div class="mt-10 grid grid-cols-2 gap-5">
+
+            <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
+              <div class="w-12 h-12 rounded-xl bg-brand-100 flex items-center justify-center mb-4">
+                <svg class="w-6 h-6 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path d="M5 13l4 4L19 7"/>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-neutral-900">Fast Checkout</h3>
+              <p class="text-sm text-neutral-500 mt-1">Secure one-step checkout experience</p>
+            </div>
+
+            <div class="bg-white border border-neutral-200 rounded-2xl p-5 shadow-sm">
+              <div class="w-12 h-12 rounded-xl bg-brand-100 flex items-center justify-center mb-4">
+                <svg class="w-6 h-6 text-brand-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path d="M12 21C12 21 4 16 4 9.5A4.5 4.5 0 0 1 12 6a4.5 4.5 0 0 1 8 3.5C20 16 12 21 12 21z"/>
+                </svg>
+              </div>
+              <h3 class="font-semibold text-neutral-900">Wishlist Sync</h3>
+              <p class="text-sm text-neutral-500 mt-1">Save products across all devices</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Login Card -->
+      <div class="w-full max-w-md mx-auto">
+
+        <div class="bg-white/95 backdrop-blur-xl border border-neutral-200 rounded-3xl shadow-xl p-8 sm:p-10">
+
+          <!-- Logo -->
+          <div class="text-center mb-8">
+            <a href="/" class="inline-flex items-center text-3xl font-black tracking-tight">
+              <span class="text-brand-600">Shop</span>
+              <span class="text-neutral-900">verse</span>
+            </a>
+
+            <h2 class="mt-6 text-2xl font-bold text-neutral-900">
+              Welcome back
+            </h2>
+
+            <p class="mt-2 text-neutral-500 text-sm">
+              Sign in to continue shopping premium products
+            </p>
+          </div>
+
+          <!-- Messages -->
+          {% if messages %}
+            {% for message in messages %}
+              <div class="mb-5 px-4 py-3 rounded-2xl text-sm font-medium
+                {% if message.tags == 'error' %}
+                  bg-danger-50 text-danger-700 border border-danger-200
+                {% else %}
+                  bg-success-50 text-success-700 border border-success-200
+                {% endif %}">
+                {{ message }}
+              </div>
+            {% endfor %}
+          {% endif %}
+
+          <!-- Form -->
+          <form method="post" class="space-y-5">
+            {% csrf_token %}
+
+            <div>
+              <label for="email" class="label">Email address</label>
+              <input
+                id="email"
+                type="email"
+                name="email"
+                required
+                autocomplete="email"
+                placeholder="you@example.com"
+                class="input h-12"
+              >
+            </div>
+
+            <div>
+              <label for="password" class="label">Password</label>
+              <input
+                id="password"
+                type="password"
+                name="password"
+                required
+                autocomplete="current-password"
+                placeholder="••••••••"
+                class="input h-12"
+              >
+            </div>
+
+            <button
+              type="submit"
+              class="w-full h-12 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-semibold transition-all duration-200 shadow-lg shadow-brand-600/20 hover:shadow-brand-600/30"
+            >
+              Sign In
+            </button>
+          </form>
+
+          <!-- Register -->
+          <p class="text-center text-sm text-neutral-500 mt-8">
+            Don’t have an account?
+            <a
+              href="/accounts/register/"
+              class="text-brand-600 font-semibold hover:text-brand-700 transition-colors"
+            >
+              Create one
+            </a>
+          </p>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}

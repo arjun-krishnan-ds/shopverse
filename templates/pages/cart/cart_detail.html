@@ -1,0 +1,222 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}Your Cart — Shopverse{% endblock %}
+
+{% block content %}
+
+{# ── Serialize cart items to JSON for Alpine reactive state ── #}
+{% load static %}
+
+<script id="cart-items-data" type="application/json">
+[{% for item in cart_items %}{"id":{{ item.id }},"name":"{{ item.variant.product.name|escapejs }}","variant":"{{ item.variant|escapejs }}","slug":"{{ item.variant.product.slug }}","price":{{ item.variant.price }},"qty":{{ item.quantity }},"image":"{% with img=item.variant.product.primary_image %}{% if img %}{{ img.image.url }}{% endif %}{% endwith %}"}{% if not forloop.last %},{% endif %}{% endfor %}]
+</script>
+
+<div
+  x-data="cartPage({{ subtotal|default:0 }}, {{ session_discount|default:0 }})"
+  x-init="initItems()"
+  class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10"
+>
+
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="text-3xl font-bold text-neutral-900">Shopping Cart</h1>
+    <span class="text-sm text-neutral-500" x-text="`${items.length} item${items.length !== 1 ? 's' : ''}`"></span>
+  </div>
+
+  {# ── Non-empty state ── #}
+  <template x-if="items.length > 0">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+
+      {# ── CART ITEMS (left column) ── #}
+      <div class="lg:col-span-2 space-y-4">
+
+        {% csrf_token %}
+
+        <template x-for="item in items" :key="item.id">
+          <div
+            :id="`cart-item-${item.id}`"
+            class="bg-white rounded-3xl border border-neutral-200 p-5 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div class="flex gap-5">
+
+              {# Image #}
+              <a :href="`/products/${item.slug}/`"
+                 class="w-28 h-28 rounded-2xl overflow-hidden bg-neutral-100 shrink-0 block">
+                <img
+                  :src="item.image || '{% static 'images/placeholder.svg' %}'"
+                  :alt="item.name"
+                  class="w-full h-full object-cover"
+                >
+              </a>
+
+              {# Content #}
+              <div class="flex-1 min-w-0">
+
+                <a :href="`/products/${item.slug}/`"
+                   class="font-semibold text-neutral-900 hover:text-brand-600 transition-colors"
+                   x-text="item.name"></a>
+
+                <p class="text-sm text-neutral-500 mt-1" x-text="item.variant"></p>
+
+                <div class="flex items-center justify-between mt-5">
+
+                  {# Quantity control #}
+                  <div class="flex items-center border border-neutral-300 rounded-xl overflow-hidden">
+
+                    <button
+                      @click="decreaseQty(item)"
+                      :disabled="item.qty <= 1 || loading"
+                      class="w-10 h-10 hover:bg-neutral-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-neutral-700 font-medium"
+                    >−</button>
+
+                    <div
+                      x-text="item.qty"
+                      class="w-10 text-center text-sm font-semibold text-neutral-900"
+                    ></div>
+
+                    <button
+                      @click="increaseQty(item)"
+                      :disabled="loading"
+                      class="w-10 h-10 hover:bg-neutral-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors flex items-center justify-center text-neutral-700 font-medium"
+                    >+</button>
+
+                  </div>
+
+                  {# Per-item total — REACTIVE #}
+                  <div class="text-right">
+                    <div class="font-bold text-lg text-neutral-900"
+                         x-text="formatPrice(item.price * item.qty)"></div>
+                    <div class="text-xs text-neutral-400 mt-0.5"
+                         x-text="formatPrice(item.price) + ' each'"
+                         x-show="item.qty > 1"></div>
+                  </div>
+
+                </div>
+              </div>
+
+              {# Remove button #}
+              <button
+                @click="removeItem(item.id)"
+                :disabled="loading"
+                class="text-neutral-400 hover:text-red-600 transition-colors self-start disabled:opacity-40"
+                aria-label="Remove item"
+              >
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path d="M18 6L6 18M6 6l12 12"/>
+                </svg>
+              </button>
+
+            </div>
+          </div>
+        </template>
+
+        <a
+          href="/products/"
+          class="inline-flex items-center gap-2 text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+        >
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="m15 18-6-6 6-6"/>
+          </svg>
+          Continue Shopping
+        </a>
+
+      </div>
+
+      {# ── ORDER SUMMARY (right column) ── #}
+      <div>
+        <div class="bg-white rounded-3xl border border-neutral-200 p-6 sticky top-24">
+
+          <h2 class="text-lg font-bold text-neutral-900 mb-6">Order Summary</h2>
+
+          <div class="space-y-4">
+
+            {# Line items breakdown #}
+            <template x-for="item in items" :key="item.id">
+              <div class="flex justify-between text-sm">
+                <span class="text-neutral-500 truncate pr-4"
+                      x-text="`${item.name} × ${item.qty}`"></span>
+                <span class="font-medium text-neutral-900 shrink-0"
+                      x-text="formatPrice(item.price * item.qty)"></span>
+              </div>
+            </template>
+
+            <div class="border-t border-neutral-100 pt-4 space-y-3">
+
+              {# Subtotal #}
+              <div class="flex justify-between text-sm">
+                <span class="text-neutral-500">Subtotal</span>
+                <span class="font-semibold text-neutral-900" x-text="formatPrice(computedSubtotal)"></span>
+              </div>
+
+              {# Discount — only if applied #}
+              <template x-if="discount > 0">
+                <div class="flex justify-between text-sm">
+                  <span class="text-success-600 font-medium">
+                    Discount
+                    {% if session_coupon %}
+                      <span class="text-xs bg-success-50 px-1.5 py-0.5 rounded ml-1">{{ session_coupon }}</span>
+                    {% endif %}
+                  </span>
+                  <span class="font-semibold text-success-600"
+                        x-text="'−' + formatPrice(discount)"></span>
+                </div>
+              </template>
+
+            </div>
+
+            {# Total #}
+            <div class="border-t border-neutral-200 pt-4 flex justify-between">
+              <span class="font-bold text-neutral-900">Total</span>
+              <span class="font-bold text-xl text-neutral-900"
+                    x-text="formatPrice(computedTotal)"></span>
+            </div>
+
+          </div>
+
+          {# Loading indicator #}
+          <div x-show="loading" class="mt-4 flex items-center justify-center gap-2 text-sm text-neutral-500">
+            <div class="w-4 h-4 border-2 border-brand-600 border-t-transparent rounded-full animate-spin"></div>
+            <span>Updating cart…</span>
+          </div>
+
+          <a
+            href="/orders/checkout/"
+            class="mt-6 block w-full text-center bg-brand-600 hover:bg-brand-700 text-white py-3.5 rounded-2xl font-semibold transition-colors"
+            :class="loading ? 'pointer-events-none opacity-60' : ''"
+          >
+            Proceed to Checkout
+          </a>
+
+          <p class="text-center text-xs text-neutral-400 mt-4">
+            Free delivery on orders over ₹999
+          </p>
+
+        </div>
+      </div>
+
+    </div>
+  </template>
+
+  {# ── Empty cart state ── #}
+  <template x-if="items.length === 0">
+    <div class="text-center py-24">
+
+      <div class="text-6xl mb-4">🛒</div>
+
+      <h2 class="text-2xl font-bold text-neutral-900 mb-2">Your cart is empty</h2>
+
+      <p class="text-neutral-500 mb-8">Add products to start shopping.</p>
+
+      <a
+        href="/products/"
+        class="inline-flex items-center px-6 py-3 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-semibold transition-colors"
+      >
+        Browse Products
+      </a>
+
+    </div>
+  </template>
+
+</div>
+
+{% endblock %}

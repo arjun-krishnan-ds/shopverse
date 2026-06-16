@@ -1,0 +1,253 @@
+{% extends "layouts/base.html" %}
+
+{% block title %}Order #{{ order.order_number }} — Shopverse{% endblock %}
+
+{% block content %}
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+
+    <div>
+      <a href="/orders/my-orders/" class="text-sm text-neutral-500 hover:text-neutral-800 transition-colors">
+        ← My Orders
+      </a>
+
+      <h1 class="text-xl font-bold text-neutral-900 mt-1">
+        Order #{{ order.order_number }}
+      </h1>
+
+      <p class="text-sm text-neutral-500">
+        Placed {{ order.created_at|date:"F j, Y" }}
+      </p>
+    </div>
+
+    <div class="flex items-center gap-3">
+
+      <span class="text-sm font-semibold px-4 py-1.5 rounded-full
+        {% if order.status == 'delivered' %}bg-success-100 text-success-700
+        {% elif order.status == 'cancelled' %}bg-danger-100 text-danger-700
+        {% elif order.status == 'shipped' or order.status == 'out_for_delivery' %}bg-blue-100 text-blue-700
+        {% elif order.status == 'paid' or order.status == 'processing' %}bg-brand-100 text-brand-700
+        {% else %}bg-neutral-100 text-neutral-600{% endif %}">
+        {{ order.get_status_display }}
+      </span>
+
+      {% if order.can_be_cancelled %}
+      <form method="post" action="/orders/cancel/{{ order.order_number }}/"
+            onsubmit="return confirm('Cancel this order?')">
+        {% csrf_token %}
+        <button type="submit"
+                class="text-sm font-semibold text-danger-600 hover:text-danger-700 border border-danger-300 hover:border-danger-500 px-4 py-1.5 rounded-xl transition-colors">
+          Cancel Order
+        </button>
+      </form>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <!-- Progress tracker -->
+  {% if order.status != 'cancelled' %}
+  <div class="bg-white border border-neutral-200 rounded-2xl p-6">
+
+    <div class="relative">
+
+      <div class="absolute top-4 left-0 right-0 h-0.5 bg-neutral-200 z-0">
+        <div class="h-full bg-brand-600 transition-all duration-700"
+             style="width: {{ progress_width }}%"></div>
+      </div>
+
+      <div class="relative z-10 flex justify-between">
+
+        {% for step in delivery_info.status_steps %}
+        <div class="flex flex-col items-center gap-2">
+
+          <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold
+            {% if step.active %}bg-brand-600 text-white{% else %}bg-neutral-200 text-neutral-400{% endif %}">
+            {{ step.icon }}
+          </div>
+
+          <span class="text-[10px] font-medium
+            {% if step.active %}text-brand-600{% else %}text-neutral-400{% endif %}
+            text-center max-w-[4rem] leading-tight hidden sm:block">
+            {{ step.step }}
+          </span>
+
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Items -->
+    <div class="lg:col-span-2 bg-white border border-neutral-200 rounded-2xl overflow-hidden">
+
+      <div class="px-5 py-4 border-b border-neutral-100">
+        <h2 class="font-bold text-neutral-900">
+          Items ({{ order.items.count }})
+        </h2>
+      </div>
+
+      <div class="divide-y divide-neutral-100">
+
+        {% for item in order.items.all %}
+        <div class="flex items-center gap-4 px-5 py-4">
+
+          <div class="w-14 h-14 rounded-xl bg-neutral-100 shrink-0 overflow-hidden">
+            {% if item.product_variant and item.product_variant.product.primary_image %}
+            <img src="{{ item.product_variant.product.primary_image.image.url }}"
+                 alt="{{ item.product_name }}"
+                 class="w-full h-full object-cover">
+            {% endif %}
+          </div>
+
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-neutral-900 truncate">
+              {{ item.product_name }}
+            </p>
+            <p class="text-xs text-neutral-500">
+              SKU: {{ item.sku }}
+            </p>
+          </div>
+
+          <div class="text-right shrink-0">
+            <p class="text-sm font-bold text-neutral-900">
+              ₹{{ item.total_price|floatformat:0 }}
+            </p>
+            <p class="text-xs text-neutral-500">
+              × {{ item.quantity }}
+            </p>
+          </div>
+
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+
+    <!-- Right column -->
+    <div class="space-y-5">
+
+      <!-- Payment summary -->
+      <div class="bg-white border border-neutral-200 rounded-2xl p-5 space-y-3">
+
+        <h2 class="font-bold text-neutral-900 text-sm">
+          Payment Summary
+        </h2>
+
+        <div class="space-y-2 text-sm">
+
+          <div class="flex justify-between text-neutral-600">
+            <span>Subtotal</span>
+            <span>₹{{ order.subtotal|floatformat:0 }}</span>
+          </div>
+
+          {% if order.discount_amount %}
+          <div class="flex justify-between text-success-600">
+            <span>Discount</span>
+            <span>−₹{{ order.discount_amount|floatformat:0 }}</span>
+          </div>
+          {% endif %}
+
+          <div class="flex justify-between text-neutral-600">
+            <span>Delivery</span>
+            <span>
+              {% if order.shipping_cost %}
+                ₹{{ order.shipping_cost|floatformat:0 }}
+              {% else %}
+                Free
+              {% endif %}
+            </span>
+          </div>
+
+        </div>
+
+        <hr class="border-neutral-100">
+
+        <div class="flex justify-between font-bold text-neutral-900">
+          <span>Total</span>
+          <span>₹{{ order.total_amount|floatformat:0 }}</span>
+        </div>
+
+        <div class="space-y-1 text-xs text-neutral-500">
+
+          <p>
+            Method:
+            {% if order.payment_method == "cod" %}
+              Cash on Delivery
+            {% elif order.payment_method == "stripe" %}
+              Stripe
+            {% else %}
+              {{ order.payment_method }}
+            {% endif %}
+          </p>
+
+          <p>
+            Status:
+            {% if order.is_paid %}
+              Paid
+            {% else %}
+              Payment Pending
+            {% endif %}
+          </p>
+
+        </div>
+
+      </div>
+
+      <!-- Address -->
+      {% if order.address %}
+      <div class="bg-white border border-neutral-200 rounded-2xl p-5">
+        <h2 class="font-bold text-neutral-900 text-sm mb-3">
+          Delivery Address
+        </h2>
+
+        <p class="text-sm font-semibold text-neutral-900">
+          {{ order.address.full_name }}
+        </p>
+
+        <p class="text-xs text-neutral-500 mt-1 leading-relaxed">
+          {{ order.address.address_line_1 }}{% if order.address.address_line_2 %}, {{ order.address.address_line_2 }}{% endif %}<br>
+          {{ order.address.city }}, {{ order.address.state }} — {{ order.address.postal_code }}<br>
+          {{ order.address.country }}<br>
+          📞 {{ order.address.phone }}
+        </p>
+      </div>
+      {% endif %}
+
+      <!-- Tracking -->
+      {% if order.tracking_id %}
+      <div class="bg-white border border-neutral-200 rounded-2xl p-5">
+        <h2 class="font-bold text-neutral-900 text-sm mb-3">
+          Tracking
+        </h2>
+
+        <p class="text-xs text-neutral-500">
+          Courier: {{ order.courier_name|default:"—" }}
+        </p>
+
+        <p class="text-xs text-neutral-500 mt-1">
+          Tracking ID:
+          <span class="font-mono font-semibold text-neutral-900">
+            {{ order.tracking_id }}
+          </span>
+        </p>
+      </div>
+      {% endif %}
+
+      <!-- Invoice -->
+      <a href="/orders/invoice/{{ order.id }}/"
+         class="flex items-center justify-center gap-2 w-full border border-neutral-300 hover:border-neutral-500 text-neutral-700 font-semibold py-2.5 rounded-xl text-sm transition-colors">
+        Download Invoice
+      </a>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}

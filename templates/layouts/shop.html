@@ -1,0 +1,9 @@
+{% extends "layouts/base.html" %}
+
+{% block content %}
+  {% if breadcrumbs %}
+    {% include "partials/ui/breadcrumb.html" %}
+  {% endif %}
+
+  {% block shop_content %}{% endblock %}
+{% endblock %}

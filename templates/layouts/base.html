@@ -1,0 +1,42 @@
+{% load django_vite %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <meta name="description"
+        content="{% block meta_description %}Shopverse — premium products, seamless shopping.{% endblock %}">
+
+  <title>{% block title %}Shopverse{% endblock %}</title>
+
+  {% if debug %}
+    <script type="module" src="http://127.0.0.1:5173/@vite/client"></script>
+    <script type="module" src="http://127.0.0.1:5173/src/main.js"></script>
+  {% else %}
+    {% vite_asset 'src/main.js' %}
+  {% endif %}
+</head>
+
+<body
+  x-data
+  class="bg-white text-neutral-900 antialiased"
+  x-init="$store.wishlist.init({{ wishlist_product_ids|default:'[]'|safe }})"
+>
+
+  {% include "partials/ui/toast_container.html" %}
+  {% include "partials/layout/navbar.html" %}
+  {% include "partials/layout/search_overlay.html" %}
+  {% include "partials/cart/cart_drawer.html" %}
+
+  <main id="main-content" class="min-h-screen">
+    {% block content %}{% endblock %}
+  </main>
+
+  {% include "partials/layout/footer.html" %}
+
+  {% block extra_body %}{% endblock %}
+</body>
+
+</html>
